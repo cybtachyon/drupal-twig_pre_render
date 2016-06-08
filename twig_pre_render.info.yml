@@ -1,0 +1,6 @@
+name: Twig Pre-Render
+description: 'Provides a twig extension to pre-render render arrays.'
+package: Twig
+
+type: module
+core: 8.x

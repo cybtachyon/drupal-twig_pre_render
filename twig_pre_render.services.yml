@@ -1,0 +1,11 @@
+# Twig Pre Render Extension Services
+services:
+  twig_pre_render.twig.pre_render_extension:
+    arguments: ['@renderer', '@controller_resolver', '@theme.registry', '@element_info']
+    class: Drupal\twig_pre_render\TwigExtension\PreRenderExtension
+    tags:
+      - { name: twig.extension }
+    calls:
+      - [setUrlGenerator, ['@url_generator']]
+      - [setThemeManager, ['@theme.manager']]
+      - [setDateFormatter, ['@date.formatter']]
