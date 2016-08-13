@@ -18,6 +18,13 @@ use Drupal\Core\Utility\ThemeRegistry;
 class PreRenderExtension extends TwigExtension {
 
   /**
+   * Whether or not to use lazyload lazysizes config.
+   *
+   * @TODO: Make this configurable.
+   */
+  const LAZYLOAD = FALSE;
+
+  /**
    * The Controller Resolver.
    *
    * @var \Drupal\Core\Controller\ControllerResolverInterface
@@ -278,6 +285,43 @@ class PreRenderExtension extends TwigExtension {
       }
       $image['src'] = isset($image['uri']) ? file_create_url($image['uri']) : NULL;
       unset($image['attributes']['src']);
+      if ($this::LAZYLOAD) {
+        $data_attributes = [
+          'src' => '',
+          'srcset' => '',
+          'sources' => [
+            'srcset',
+          ],
+          'attributes' => 'srcset',
+        ];
+        $data_prefix = 'data-';
+        // Replaces listed image attributes with data_prefix attributes.
+        foreach ($data_attributes as $attribute => $secondary) {
+          if (isset($image[$attribute])) {
+            if (is_array($secondary)) {
+              foreach ($secondary as $secondary_attribute) {
+                foreach ($image[$attribute] as $delta => $properties) {
+                  $image[$attribute][$delta][$data_prefix . $secondary_attribute] = $image[$attribute][$delta][$secondary_attribute];
+                  unset($image[$attribute][$delta][$secondary_attribute]);
+                }
+              }
+            }
+            elseif (!empty($secondary)) {
+              $image[$attribute][$data_prefix . $secondary] = $image[$attribute][$secondary];
+              unset($image[$attribute][$secondary]);
+            }
+            else {
+              $image[$data_prefix . $attribute] = $image[$attribute];
+              unset($image[$attribute]);
+            }
+          }
+        }
+        // If the source was replaced with a data attribute,
+        // move it to attributes array.
+        if (!empty($image['data-src'])) {
+          $image['attributes']['data-src'] = $image['data-src'];
+        }
+      }
       $attributes[] = $image;
     }
     if (count($attributes) == 1) {
