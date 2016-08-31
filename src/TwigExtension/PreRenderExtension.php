@@ -10,19 +10,13 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Template\TwigExtension;
 use Drupal\Core\Theme\Registry;
+use Drupal\Core\Url;
 use Drupal\Core\Utility\ThemeRegistry;
 
 /**
  * A Twig extension that adds a Drupal pre-render Twig function.
  */
 class PreRenderExtension extends TwigExtension {
-
-  /**
-   * Whether or not to use lazyload lazysizes config.
-   *
-   * @TODO: Make this configurable.
-   */
-  const LAZYLOAD = FALSE;
 
   /**
    * The Controller Resolver.
@@ -171,10 +165,10 @@ class PreRenderExtension extends TwigExtension {
       $default_attributes = new Attribute();
     }
     foreach ([
-               'attributes',
-               'title_attributes',
-               'content_attributes',
-             ] as $key) {
+      'attributes',
+      'title_attributes',
+      'content_attributes',
+    ] as $key) {
       if (isset($variables[$key]) && !($variables[$key] instanceof Attribute)) {
         if ($variables[$key]) {
           $variables[$key] = new Attribute($variables[$key]);
@@ -285,7 +279,8 @@ class PreRenderExtension extends TwigExtension {
       }
       $image['src'] = isset($image['uri']) ? file_create_url($image['uri']) : NULL;
       unset($image['attributes']['src']);
-      if ($this::LAZYLOAD) {
+      $config = \Drupal::config('twig_pre_render.settings');
+      if ($config->get('lazyload')) {
         $data_attributes = [
           'src' => '',
           'srcset' => '',
@@ -318,8 +313,12 @@ class PreRenderExtension extends TwigExtension {
         }
         // If the source was replaced with a data attribute,
         // move it to attributes array.
-        if (!empty($image['data-src'])) {
-          $image['attributes']['data-src'] = $image['data-src'];
+        if (!empty($image[$data_prefix . 'src'])) {
+          $image['attributes'][$data_prefix . 'src'] = $image[$data_prefix . 'src'];
+        }
+        $placeholder_path = $config->get('placeholder_path');
+        if (!empty($placeholder_path)) {
+          $image['src'] = Url::fromUserInput($placeholder_path)->toString();
         }
       }
       $attributes[] = $image;

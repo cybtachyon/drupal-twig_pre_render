@@ -1,0 +1,7 @@
+twig_pre_render.settings:
+  path: '/admin/config/media/twig-pre-render'
+  defaults:
+    _form:  '\Drupal\twig_pre_render\Form\PreRenderSettings'
+    _title: 'Twig Pre-render settings'
+  requirements:
+    _permission: 'configure media'

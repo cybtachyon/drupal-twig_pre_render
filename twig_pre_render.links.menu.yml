@@ -1,0 +1,5 @@
+twig_pre_render.settings:
+  route_name: twig_pre_render.settings
+  title: 'Twig Pre-Render settings'
+  parent: system.admin_config_media
+  description: 'Configure Twig Pre-Render system settings.'
